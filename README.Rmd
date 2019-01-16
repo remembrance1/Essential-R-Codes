@@ -1,0 +1,14 @@
+---
+title: "Essential R Codes"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introductions
+
+This is a collection of self-built useful R codes within the space of "Data Processing" and "Exploratory Data Analysis." 
+
+
