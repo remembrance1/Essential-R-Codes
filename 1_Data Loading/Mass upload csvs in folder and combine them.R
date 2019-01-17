@@ -1,0 +1,17 @@
+###########################################################################################################
+#    Function: To mass-upload .csv files in folder into global.environment and combine files              #
+#    Written by: Javier Ng                                                                                #
+#    Date: 12/10/2018                                                                                     #
+#    Libraries Used: Plyr, readxl                                                                         #
+###########################################################################################################
+
+setwd("C:/Users/zm679xs/Desktop/....") #set working directory
+
+library(readxl) #library used to read .csv function
+
+file.list <- list.files(pattern='*.csv') #obtained name of all the files in directory
+df.list <- lapply(file.list, read.csv) #list of all uploaded files
+
+compileddf <- plyr::rbind.fill(df.list) #Compiling into one dataframe
+
+write.csv(compileddf, "compiledfile.csv") #saving it as one .csv
