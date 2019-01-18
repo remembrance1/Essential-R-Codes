@@ -14,7 +14,7 @@ df2 <- data.frame(grocery = c("Durian", "Apple", "Watermelon"),
                   favourite.food = c("Apple", "ORANGE", "Cakes"), 
                   invoice = c("XD1", "XD2", "XD3"))
 df3 <- data.frame(address=c("address1", "address2", "address3"), location = c("USA", "UK", "China"), test = c("a", "apple", "orange"))
-df4 <- data.frame(a=c("no", "no"), b=c("yes", "yes"))
+df4 <- data.frame(a=c("no", "no"), b=c("yes", "yes"), c=c("Apple", "address1"))
 
 #setting null list
 templist <- list() #create templist
@@ -62,20 +62,24 @@ insertref_obj <- function(refobj){
   return(templist) #returns a list
 }
 
-#renamecol_combine(insertref_obj(allobj[2:4]), allobj[2:4])
+#create the final output workbook
+workbook_create <- function(createdlist){
+  wb <- createWorkbook()
+  sheetnames <- paste0("Sheet", seq_along(createdlist)) # or names(datas) if provided
+  sheets <- lapply(sheetnames, createSheet, wb = wb)
+  void <- Map(addDataFrame, createdlist, sheets)
+  saveWorkbook(wb, file = "KeyIDs.xlsx")
+}
 
 ################################################################################################
-renamecol_combine(insertref_obj(allobj_new[[2]]), allobj_new[[2]]) 
-
-ultimatefunction <- function(env_obj_list){
+final_list <- function(env_obj_list){
   for (i in 1:length(env_obj_list)){
     newlist[[i]] <- renamecol_combine(insertref_obj(env_obj_list[[i]]), env_obj_list[[i]])
   }
   return(newlist)
 }
                                                  
-t1 <- ultimatefunction(allobj_new) #need to save each dataframe from the list into a sheet in workbook
-sink("output.txt")
-print(t1)
-sink()
+workbook_create(final_list(allobj_new)) 
+
+
 
