@@ -26,7 +26,9 @@ df %>% mutate(z = ifelse(x<3 & x>1 & y<6 & y>3, 'apple',
 )
 
 #condiitonal filter of 1 col and update same column
-
 df %>% 
   mutate(Budget = ifelse(Amount < 0, Amount, Budget),
          Amount = ifelse(Amount < 0, NA, Amount))
+
+#conditional filter to loop through each row to check if it EXISTS in another column (from another dataframe or same dataframe also can)
+df %>% mutate(`Exist?` = ifelse(df$Product.Id %in% df2$PART_ID == T, "Yes", "No")) -> updatedataframe
