@@ -149,3 +149,15 @@ str_subset(x, "^[a-zA-Z]+(\\_|\\-).*\\.com$")
 # str_subset(x, "^[a-zA-Z]+(\\_|\\-).*\\.com$")
 # #[1] "happy_to-learn.com"
 # Also, the .* refers to zero or more characters as . can be any character until the . and 'com' at the end ($) of the string
+
+################ Method 2 with BASE R ##################################################
+grep("^[[:alpha:]_-]+.*\\.com$", x, value = TRUE)
+#[1] "happy_to-learn.com"
+
+Explanation:
+
+"^" marks the beginning of the string.
+"[:alpha:] matches any alphabetic character, upper or lower case in a portable way.
+"^[[:alpha:]_-]+" between [], there are alternative characters to match repeated one or more times. Alphabetic or the underscore _ or the minus sign -.
+"^[[:alpha:]_-]+.*" The above followed by any character repeated zero or more times.
+"^[[:alpha:]_-]+.*\\.com$" ending with the string ".com" where the dot is not a metacharacter and therefore must be escaped.
