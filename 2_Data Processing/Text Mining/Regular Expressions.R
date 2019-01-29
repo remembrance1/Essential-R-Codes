@@ -161,3 +161,4 @@ Explanation:
 "^[[:alpha:]_-]+" between [], there are alternative characters to match repeated one or more times. Alphabetic or the underscore _ or the minus sign -.
 "^[[:alpha:]_-]+.*" The above followed by any character repeated zero or more times.
 "^[[:alpha:]_-]+.*\\.com$" ending with the string ".com" where the dot is not a metacharacter and therefore must be escaped.
+
