@@ -2,6 +2,7 @@ library(tidyverse)
 theme_set(theme_light())
 library(malariaAtlas)
 library(ggplot2)
+library(dplyr)
 
 kenya_pr <- tbl_df(malariaAtlas::getPR(ISO = "KEN", species = "BOTH")) %>%
   filter(!is.na(pr))
@@ -10,13 +11,23 @@ kenya_pr %>%
   group_by(year_start) %>%
   summarize(examined = sum(examined),
             positive = sum(positive),
-            studies = n()) %>%
+            studies = n()) %>% 
   mutate(pr = positive / examined) %>%
   ggplot(aes(year_start, pr)) + #pr = prevalence
   geom_line()
 
-kenya_pr %>%
-  mutate(decade = 10 * (year_start %/% 10)) %>%
+kenya_pr %>% 
+  group_by(year_start, species, method) %>%
+  summarize(examined = sum(examined),
+            positived = sum(positive),
+            studies = n()) %>%
+  mutate(ratio = positived/examined) %>%
+  ggplot(aes(year_start, ratio, colour = species, shape = method)) +
+  geom_point() +
+  ggtitle("Ratio of Positive to Examined Cases")
+
+  kenya_pr %>%
+  mutate(deca,de = 10 * (year_start %/% 10)) %>%
   arrange(pr) %>%
   ggplot(aes(longitude, latitude, color = pr)) +
   borders("world", regions = "Kenya") +
