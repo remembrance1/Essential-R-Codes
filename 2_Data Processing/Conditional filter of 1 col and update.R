@@ -32,3 +32,20 @@ df %>%
 
 #conditional filter to loop through each row to check if it EXISTS in another column (from another dataframe or same dataframe also can)
 df %>% mutate(`Exist?` = ifelse(df$Product.Id %in% df2$PART_ID == T, "Yes", "No")) -> updatedataframe
+
+##########################################################################3
+#identify if there are differences in col A and col B
+df <- data.frame(ID = c("1234", "1234", "7491", "7319", "321", "321"), add = c("ABC", "DEF", "HIJ", "KLM", "WXY", "WXY"))
+aggqty %>% group_by(`DIST INVOICE-PART KEY`) %>% mutate(diff = ifelse(n_distinct(`DIST Ship to Addr1 Desc`)>1, "YES", "NO")) -> t
+
+#DPLYR SOLUTION
+library(dplyr)
+
+df %>% 
+  group_by(ID) %>% 
+  mutate(diff = ifelse(length(unique(add))>1, "YES", "NO")) # n_distict(add)>1 will also work 
+#mutate(diff = ifelse(n_distinct(add)>1, "YES", "NO"))
+
+#Using data.table
+setDT(df)
+df[, diff := if (uniqueN(add) > 1) "Yes" else "No", by = ID]

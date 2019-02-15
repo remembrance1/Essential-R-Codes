@@ -14,4 +14,10 @@ duplrowsall <- df[(duplicated(df) | duplicated(df, fromLast = TRUE)), ]
 #Get dataframe that does not have any duplicated entry at all 
 duplrowsgone <- df[!(duplicated(df) | duplicated(df, fromLast = TRUE)), ]
 
+#identifying duplicated rows 
+duplicated1 <- df[duplicated(df),] #duplicated entries
+nondup <- distinct(df)
+nondup$Dup_Test <- "No"
+duplicated1$Dup_Test <- "Yes"
 
+df <- rbind(nondup, duplicated1)
