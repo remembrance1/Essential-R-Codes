@@ -49,3 +49,12 @@ df %>%
 #Using data.table
 setDT(df)
 df[, diff := if (uniqueN(add) > 1) "Yes" else "No", by = ID]
+
+## Groupby the ID, to test if there are differences in the cost column and update a new column called Test diff
+## AND remove the first row
+df <- data.frame(ID = c("A", "A", "B", "B", "B","C", "C", "D"), cost = c("0.5", "0.4", "0.7", "0.8", "0.5", "1.3", "1.3", "2.6"))
+#tidyverse solution 
+df %>%
+  group_by(ID) %>%
+  mutate(Testdiff = ifelse(all(cos == first(cost)), "N", "Y")) %>%
+  filter(row_number() == 1) ## will filter out the very first entry only
