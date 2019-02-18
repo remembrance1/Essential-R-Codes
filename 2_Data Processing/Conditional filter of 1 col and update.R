@@ -58,3 +58,8 @@ df %>%
   group_by(ID) %>%
   mutate(Testdiff = ifelse(all(cos == first(cost)), "N", "Y")) %>%
   filter(row_number() == 1) ## will filter out the very first entry only
+
+## Concatenate columns if they have the same value in one column (UF)
+df <- data.frame(UF = c("A", "A", "B", "C"), add = c("hello123", "hihi", "f;un", "das"))
+df %>% group_by(UF) %>% mutate(add = paste(add, collapse = ';;;')) %>% slice(1) %>% #choose only the 1st row
+  mutate(ConcatAdd = ifelse(grepl(";;;", add), "YES", "NO")) #this will create new column to test for concate
