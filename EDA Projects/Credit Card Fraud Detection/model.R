@@ -1,5 +1,3 @@
-setwd("C:/Users/zm679xs/Desktop/R/Essential-R-Codes/EDA Projects/Credit Card Fraud Detection")
-
 # This R environment comes with all of CRAN preinstalled, as well as many other helpful packages
 # The environment is defined by the kaggle/rstats docker image: https://github.com/kaggle/docker-rstats
 # For example, here's several helpful packages to load in 
@@ -15,8 +13,7 @@ library(pROC) # AUC
 
 # Input data files are available in the "../input/" directory.
 # For example, running this (by clicking run or pressing Shift+Enter) will list the files in the input directory
-
-ccdata <- read.csv("creditcard.csv")
+load("ccdata.RData")
 
 ## split into train, test, cv
 set.seed(1900)
@@ -95,3 +92,14 @@ test$prediction <- ifelse(test$prediction >= 0.5, 1 , 0)
 
 #Compute the accuracy of predictions.
 confusionMatrix(as.factor(test$prediction), as.factor(test$Class))
+
+#plot a boosted tree model 
+xgb.plot.tree(model = bst, trees = 0, show_node_id = T)
+
+#multiple-in-one plot
+#Ensemble several trees into a single one
+xgb.plot.multi.trees(model = bst)
+
+##plot feature importance
+importance_matrix <- xgb.importance(model = bst)
+xgb.plot.importance(importance_matrix)
