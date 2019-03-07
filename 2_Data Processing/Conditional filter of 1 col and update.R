@@ -36,7 +36,7 @@ df %>% mutate(`Exist?` = ifelse(df$Product.Id %in% df2$PART_ID == T, "Yes", "No"
 ##########################################################################3
 #identify if there are differences in col A and col B
 df <- data.frame(ID = c("1234", "1234", "7491", "7319", "321", "321"), add = c("ABC", "DEF", "HIJ", "KLM", "WXY", "WXY"))
-aggqty %>% group_by(`DIST INVOICE-PART KEY`) %>% mutate(diff = ifelse(n_distinct(`DIST Ship to Addr1 Desc`)>1, "YES", "NO")) -> t
+df %>% group_by(ID) %>% mutate(diff = ifelse(n_distinct(add)>1, "YES", "NO")) 
 
 #DPLYR SOLUTION
 library(dplyr)
@@ -56,10 +56,15 @@ df <- data.frame(ID = c("A", "A", "B", "B", "B","C", "C", "D"), cost = c("0.5", 
 #tidyverse solution 
 df %>%
   group_by(ID) %>%
-  mutate(Testdiff = ifelse(all(cos == first(cost)), "N", "Y")) %>%
+  mutate(Testdiff = ifelse(all(cost == first(cost)), "N", "Y")) %>%
   filter(row_number() == 1) ## will filter out the very first entry only
 
 ## Concatenate columns if they have the same value in one column (UF)
 df <- data.frame(UF = c("A", "A", "B", "C"), add = c("hello123", "hihi", "f;un", "das"))
 df %>% group_by(UF) %>% mutate(add = paste(add, collapse = ';;;')) %>% slice(1) %>% #choose only the 1st row
   mutate(ConcatAdd = ifelse(grepl(";;;", add), "YES", "NO")) #this will create new column to test for concate
+
+##Compare 2 columns' rows if they are the same value. If yes, spit out 1 for the test.
+df <- data.frame(ID = c("1234", "1234", "7491", "7319", "321", "321"), add = c("1234", "1234", "749s1", "73a19", "321", "321"))
+df %>% mutate(TEST = ifelse(as.character(df$ID) == as.character(df$add), 1, 0))
+

@@ -1,7 +1,7 @@
 # This R environment comes with all of CRAN preinstalled, as well as many other helpful packages
 # The environment is defined by the kaggle/rstats docker image: https://github.com/kaggle/docker-rstats
 # For example, here's several helpful packages to load in 
-
+setwd("C:/Users/zm679xs/Desktop/R/Essential-R-Codes/EDA Projects/Credit Card Fraud Detection")
 library(ggplot2) # Data visualization
 library(readr) # CSV file I/O, e.g. the read_csv function
 library(caret)
@@ -81,12 +81,12 @@ ggplot(data=melted, aes(x=iter, y=value, group=variable, color = variable)) + ge
 ## Make predictions
 bst <- xgboost(
   param=parameters,
-  data =as.matrix(train[,predictors]),
+  data =as.matrix(train[,predictors]), #training it without the output variable! 
   label = label,
   nrounds=min.loss.idx)
 
 # Make prediction on the testing data.
-test$prediction <- predict(bst, as.matrix(test[,predictors]))
+test$prediction <- predict(bst, as.matrix(test[,predictors])) #here, I've removed the output variable....
 
 test$prediction <- ifelse(test$prediction >= 0.5, 1 , 0)
 
