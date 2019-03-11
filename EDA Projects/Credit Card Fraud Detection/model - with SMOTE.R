@@ -26,13 +26,18 @@ cv <- testcv[-inTest,]
 train$Class <- as.factor(train$Class)
 rm(inTrain, inTest, testcv) #20% cv
 
+#using SMOTE instead
+i <- grep("Class", colnames(train)) # Get index Class column
+train_smote <- SMOTE(Class ~ ., as.data.frame(train), perc.over = 20000, perc.under=100)
+table(train_smote$Class)
+
 #Identify the Predictors and the dependent variable, aka label.
-predictors = colnames(train[-ncol(train)])
+predictors <- colnames(train_smote[-ncol(train_smote)]) #remove last column
 #xgboost works only if the labels are numeric. Hence, convert the labels (Species) to numeric.
-label = as.numeric(train[,ncol(train)])
+label <- as.numeric(train_smote[,ncol(train_smote)])
 
 #Alas, xgboost works only if the numeric labels start from 0. Hence, subtract 1 from the label.
-label = as.numeric(train[,ncol(train)])-1
+label <- as.numeric(train_smote[,ncol(train_smote)])-1
 print(table(label))
 
 # set parameters:
@@ -61,7 +66,7 @@ parameters <- list(
 cv.nround = 200;  # Number of rounds. This can be set to a lower or higher value, if you wish, example: 150 or 250 or 300  
 bst.cv <- xgb.cv(
   param=parameters,
-  data = as.matrix(train[,predictors]),
+  data = as.matrix(train_smote[,predictors]),
   label = label,
   nfold = 3,
   nrounds=cv.nround,
@@ -81,7 +86,7 @@ ggplot(data=melted, aes(x=iter, y=value, group=variable, color = variable)) + ge
 ## Make predictions
 bst <- xgboost(
   param=parameters,
-  data =as.matrix(train[,predictors]), #training it without the output variable! 
+  data =as.matrix(train_smote[,predictors]), #training it without the output variable! 
   label = label,
   nrounds=min.loss.idx)
 
@@ -91,8 +96,31 @@ test$prediction <- predict(bst, as.matrix(test[,predictors])) #here, I've remove
 test$prediction <- ifelse(test$prediction >= 0.5, 1 , 0)
 
 #Compute the accuracy of predictions.
-confusionMatrix(as.factor(test$prediction), as.factor(test$Class)) #sensitivity (TPR) = 0.99, specificity = 0.8173
-#accuracy = 99.96%, but there is imbalanced dataset...
+confmatrix_table <- confusionMatrix(as.factor(test$prediction), as.factor(test$Class)) #sensitivity (TPR) = 0.9991, specificity = 0.9135
+#accuracy = 0.9989
+
+########################################################################################################################
+
+plot_confusion_matrix <- function(test_df, sSubtitle) {
+  tst <- data.frame(round(test_df$prediction,0), test_df$Class)
+  opts <-  c("Predicted", "True")
+  names(tst) <- opts
+  cf <- plyr::count(tst)
+  cf[opts][cf[opts]==0] <- "Not Fraud"
+  cf[opts][cf[opts]==1] <- "Fraud"
+  
+  ggplot(data =  cf, mapping = aes(x = True, y = Predicted)) +
+    labs(title = "Confusion matrix", subtitle = sSubtitle) +
+    geom_tile(aes(fill = freq), colour = "grey") +
+    geom_text(aes(label = sprintf("%1.0f", freq)), vjust = 1) +
+    scale_fill_gradient(low = "lightblue", high = "Green") +
+    theme_bw() + theme(legend.position = "none")
+  
+}
+
+plot_confusion_matrix(test, paste("XGBoost with", paste("min logloss at round: ", min.loss.idx, "\n"),
+                                  "Sensitivity:", round(confmatrix_table[[4]][1], 4), "\n",
+                                  "Specificity:", round(confmatrix_table[[4]][2], 4)))
 
 #plot a boosted tree model 
 xgb.plot.tree(model = bst, trees = 0, show_node_id = T)
@@ -104,6 +132,7 @@ xgb.plot.multi.trees(model = bst)
 ##plot feature importance
 importance_matrix <- xgb.importance(model = bst)
 xgb.plot.importance(importance_matrix)
+
 
 ###############################################################
 library(ROCR)
@@ -129,6 +158,5 @@ lines(x=c(0, 1), y=c(0, 1), col="black", lty="dotted")
 
 auc_ROCR <- performance(xgb.pred, measure = "auc") #gives the AUC rate
 auc_ROCR <- auc_ROCR@y.values[[1]] 
-auc_ROCR
-#0.909 AUC
-
+auc_ROCR 
+#AUC = 0.956
