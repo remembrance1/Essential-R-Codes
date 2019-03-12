@@ -31,6 +31,13 @@ library(pROC) # AUC
 load("ccdata.RData")
 ```
 
+## Head of Data
+
+```{R}
+dim(ccdata)
+head(ccdata)
+```
+
 ## Split Data
 
 Split data into train, test and cv using caret.
@@ -50,13 +57,18 @@ rm(inTrain, inTest, testcv) #20% cv
 
 ## Imbalance Dataset
 
-Using SMOTE to make the dataset more balanced.
+Out of the 284,807 transactions, only 492 were classified as fraud cases and the rest were non-fraud. 
+
+```{R}
+table(ccdata$Class)
+```
+
+SMOTE is used to make the dataset more balanced.
 
 ```{R}
 #using SMOTE instead
 i <- grep("Class", colnames(train)) # Get index Class column
 train_smote <- SMOTE(Class ~ ., as.data.frame(train), perc.over = 20000, perc.under=100)
-table(train_smote$Class)
 
 #Identify the Predictors and the dependent variable, aka label.
 predictors <- colnames(train_smote[-ncol(train_smote)]) #remove last column
@@ -126,7 +138,7 @@ Train the model with the parameters set above and nrounds = 25 (increasing nroun
 ```{R result = F}
 ## Training of models
 # Original
-cv.nround = 200;  # Number of rounds. This can be set to a lower or higher value, if you wish, example: 150 or 250 or 300  
+cv.nround = 150;  # Number of rounds. This can be set to a lower or higher value, if you wish, example: 150 or 250 or 300  
 bst.cv <- xgb.cv(
   param=parameters,
   data = as.matrix(train_smote[,predictors]),

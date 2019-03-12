@@ -210,6 +210,47 @@ library(pROC) # AUC
 # For example, running this (by clicking run or pressing Shift+Enter) will list the files in the input directory
 load(&quot;ccdata.RData&quot;)</code></pre>
 </div>
+<div id="head-of-data" class="section level2">
+<h2>Head of Data</h2>
+<pre class="r"><code>dim(ccdata)</code></pre>
+<pre><code>## [1] 284807     31</code></pre>
+<pre class="r"><code>head(ccdata)</code></pre>
+<pre><code>##   Time         V1          V2        V3         V4          V5          V6
+## 1    0 -1.3598071 -0.07278117 2.5363467  1.3781552 -0.33832077  0.46238778
+## 2    0  1.1918571  0.26615071 0.1664801  0.4481541  0.06001765 -0.08236081
+## 3    1 -1.3583541 -1.34016307 1.7732093  0.3797796 -0.50319813  1.80049938
+## 4    1 -0.9662717 -0.18522601 1.7929933 -0.8632913 -0.01030888  1.24720317
+## 5    2 -1.1582331  0.87773675 1.5487178  0.4030339 -0.40719338  0.09592146
+## 6    2 -0.4259659  0.96052304 1.1411093 -0.1682521  0.42098688 -0.02972755
+##            V7          V8         V9         V10        V11         V12
+## 1  0.23959855  0.09869790  0.3637870  0.09079417 -0.5515995 -0.61780086
+## 2 -0.07880298  0.08510165 -0.2554251 -0.16697441  1.6127267  1.06523531
+## 3  0.79146096  0.24767579 -1.5146543  0.20764287  0.6245015  0.06608369
+## 4  0.23760894  0.37743587 -1.3870241 -0.05495192 -0.2264873  0.17822823
+## 5  0.59294075 -0.27053268  0.8177393  0.75307443 -0.8228429  0.53819555
+## 6  0.47620095  0.26031433 -0.5686714 -0.37140720  1.3412620  0.35989384
+##          V13        V14        V15        V16         V17         V18
+## 1 -0.9913898 -0.3111694  1.4681770 -0.4704005  0.20797124  0.02579058
+## 2  0.4890950 -0.1437723  0.6355581  0.4639170 -0.11480466 -0.18336127
+## 3  0.7172927 -0.1659459  2.3458649 -2.8900832  1.10996938 -0.12135931
+## 4  0.5077569 -0.2879237 -0.6314181 -1.0596472 -0.68409279  1.96577500
+## 5  1.3458516 -1.1196698  0.1751211 -0.4514492 -0.23703324 -0.03819479
+## 6 -0.3580907 -0.1371337  0.5176168  0.4017259 -0.05813282  0.06865315
+##           V19         V20          V21          V22         V23
+## 1  0.40399296  0.25141210 -0.018306778  0.277837576 -0.11047391
+## 2 -0.14578304 -0.06908314 -0.225775248 -0.638671953  0.10128802
+## 3 -2.26185710  0.52497973  0.247998153  0.771679402  0.90941226
+## 4 -1.23262197 -0.20803778 -0.108300452  0.005273597 -0.19032052
+## 5  0.80348692  0.40854236 -0.009430697  0.798278495 -0.13745808
+## 6 -0.03319379  0.08496767 -0.208253515 -0.559824796 -0.02639767
+##           V24        V25        V26          V27         V28 Amount Class
+## 1  0.06692807  0.1285394 -0.1891148  0.133558377 -0.02105305 149.62     0
+## 2 -0.33984648  0.1671704  0.1258945 -0.008983099  0.01472417   2.69     0
+## 3 -0.68928096 -0.3276418 -0.1390966 -0.055352794 -0.05975184 378.66     0
+## 4 -1.17557533  0.6473760 -0.2219288  0.062722849  0.06145763 123.50     0
+## 5  0.14126698 -0.2060096  0.5022922  0.219422230  0.21515315  69.99     0
+## 6 -0.37142658 -0.2327938  0.1059148  0.253844225  0.08108026   3.67     0</code></pre>
+</div>
 <div id="split-data" class="section level2">
 <h2>Split Data</h2>
 <p>Split data into train, test and cv using caret.</p>
@@ -226,15 +267,17 @@ rm(inTrain, inTest, testcv) #20% cv</code></pre>
 </div>
 <div id="imbalance-dataset" class="section level2">
 <h2>Imbalance Dataset</h2>
-<p>Using SMOTE to make the dataset more balanced.</p>
+<p>Out of the 284,807 transactions, only 492 were classified as fraud cases and the rest were non-fraud.</p>
+<pre class="r"><code>table(ccdata$Class)</code></pre>
+<pre><code>## 
+##      0      1 
+## 284315    492</code></pre>
+<p>SMOTE is used to make the dataset more balanced.</p>
 <pre class="r"><code>#using SMOTE instead
 i &lt;- grep(&quot;Class&quot;, colnames(train)) # Get index Class column
 train_smote &lt;- SMOTE(Class ~ ., as.data.frame(train), perc.over = 20000, perc.under=100)
-table(train_smote$Class)</code></pre>
-<pre><code>## 
-##     0     1 
-## 60400 60702</code></pre>
-<pre class="r"><code>#Identify the Predictors and the dependent variable, aka label.
+
+#Identify the Predictors and the dependent variable, aka label.
 predictors &lt;- colnames(train_smote[-ncol(train_smote)]) #remove last column
 #xgboost works only if the labels are numeric. Hence, convert the labels (Species) to numeric.
 label &lt;- as.numeric(train_smote[,ncol(train_smote)])
@@ -268,7 +311,20 @@ parameters &lt;- list(
   eval_metric        = &quot;auc&quot;,
   seed               = 1900               
 )</code></pre>
-<p>Explanation: * Booster: gbtree = tree-based models * silent: 0 = enable messages * eta: 0.3 = analogous learning rate in GBM. Makes the model more robust by shrinking the weights on each step * min_child_weight: 1 = used to control overfitting issue. Higher values prevent a model from learning relations which might be highly specific to the particular sample selected for a tree. * max_depth: 6 = maximum depth of a tree. Larger the depth, more complex the model, hence chance of overfitting. USually range is 0 to infinity. * subsample: 1 = controls number of samples supplied to a tree. Usually, 0.5-0.8 * colsample_bytree: 1 = controls number of features supplied to a tree. Usually 0.5 to 0.9 * lambda: 1 = controls L2 regularization. Avoid overfitting * alpha: 1 = controls L1 regularization on weights. More useful on high dimensional datasets * objective: binary:logistic = for binary classification * eval_metric: used to evaluatte a model’s accuracy on validation data.</p>
+<p>Explanation:</p>
+<ul>
+<li>Booster: gbtree = tree-based models</li>
+<li>silent: 0 = enable messages</li>
+<li>eta: 0.3 = analogous learning rate in GBM. Makes the model more robust by shrinking the weights on each step</li>
+<li>min_child_weight: 1 = used to control overfitting issue. Higher values prevent a model from learning relations which might be highly specific to the particular sample selected for a tree.</li>
+<li>max_depth: 6 = maximum depth of a tree. Larger the depth, more complex the model, hence chance of overfitting. USually range is 0 to infinity.</li>
+<li>subsample: 1 = controls number of samples supplied to a tree. Usually, 0.5-0.8</li>
+<li>colsample_bytree: 1 = controls number of features supplied to a tree. Usually 0.5 to 0.9</li>
+<li>lambda: 1 = controls L2 regularization. Avoid overfitting</li>
+<li>alpha: 1 = controls L1 regularization on weights. More useful on high dimensional datasets</li>
+<li>objective: binary:logistic = for binary classification</li>
+<li>eval_metric: used to evaluatte a model’s accuracy on validation data.</li>
+</ul>
 </div>
 <div id="parallel-backend-not-used" class="section level2">
 <h2>Parallel Backend (Not Used)</h2>
@@ -283,7 +339,7 @@ parameters &lt;- list(
 <p>Train the model with the parameters set above and nrounds = 25 (increasing nrounds does not improve the model anymore). Plots show increasing train and cv AUC in the beginning and stagnating at later rounds as expected.</p>
 <pre class="r"><code>## Training of models
 # Original
-cv.nround = 200;  # Number of rounds. This can be set to a lower or higher value, if you wish, example: 150 or 250 or 300  
+cv.nround = 150;  # Number of rounds. This can be set to a lower or higher value, if you wish, example: 150 or 250 or 300  
 bst.cv &lt;- xgb.cv(
   param=parameters,
   data = as.matrix(train_smote[,predictors]),
@@ -440,57 +496,7 @@ bst.cv &lt;- xgb.cv(
 ## [147]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000010 
 ## [148]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000010 
 ## [149]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000010 
-## [150]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000010 
-## [151]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000010 
-## [152]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000010 
-## [153]    train-auc:1.000000+0.000000 test-auc:0.999987+0.000011 
-## [154]    train-auc:1.000000+0.000000 test-auc:0.999987+0.000011 
-## [155]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000010 
-## [156]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000010 
-## [157]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000010 
-## [158]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000010 
-## [159]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000010 
-## [160]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000010 
-## [161]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000010 
-## [162]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000010 
-## [163]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000010 
-## [164]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000010 
-## [165]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000010 
-## [166]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000010 
-## [167]    train-auc:1.000000+0.000000 test-auc:0.999987+0.000011 
-## [168]    train-auc:1.000000+0.000000 test-auc:0.999987+0.000011 
-## [169]    train-auc:1.000000+0.000000 test-auc:0.999987+0.000011 
-## [170]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000011 
-## [171]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000011 
-## [172]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000011 
-## [173]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000011 
-## [174]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000011 
-## [175]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000011 
-## [176]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000011 
-## [177]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000011 
-## [178]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000011 
-## [179]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000011 
-## [180]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000011 
-## [181]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000011 
-## [182]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000011 
-## [183]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000011 
-## [184]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000011 
-## [185]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000011 
-## [186]    train-auc:1.000000+0.000000 test-auc:0.999987+0.000011 
-## [187]    train-auc:1.000000+0.000000 test-auc:0.999987+0.000011 
-## [188]    train-auc:1.000000+0.000000 test-auc:0.999987+0.000011 
-## [189]    train-auc:1.000000+0.000000 test-auc:0.999987+0.000011 
-## [190]    train-auc:1.000000+0.000000 test-auc:0.999987+0.000011 
-## [191]    train-auc:1.000000+0.000000 test-auc:0.999987+0.000011 
-## [192]    train-auc:1.000000+0.000000 test-auc:0.999987+0.000011 
-## [193]    train-auc:1.000000+0.000000 test-auc:0.999987+0.000011 
-## [194]    train-auc:1.000000+0.000000 test-auc:0.999987+0.000011 
-## [195]    train-auc:1.000000+0.000000 test-auc:0.999987+0.000011 
-## [196]    train-auc:1.000000+0.000000 test-auc:0.999987+0.000011 
-## [197]    train-auc:1.000000+0.000000 test-auc:0.999987+0.000011 
-## [198]    train-auc:1.000000+0.000000 test-auc:0.999987+0.000011 
-## [199]    train-auc:1.000000+0.000000 test-auc:0.999987+0.000011 
-## [200]    train-auc:1.000000+0.000000 test-auc:0.999987+0.000011</code></pre>
+## [150]    train-auc:1.000000+0.000000 test-auc:0.999988+0.000010</code></pre>
 <pre class="r"><code>#Find where the minimum logloss occurred
 min.loss.idx = which.max(bst.cv$evaluation_log[, test_auc_mean]) 
 cat(&quot;Minimum logloss occurred in round : &quot;, min.loss.idx, &quot;\n&quot;)</code></pre>
