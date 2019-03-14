@@ -68,3 +68,53 @@ df %>% group_by(UF) %>% mutate(add = paste(add, collapse = ';;;')) %>% slice(1) 
 df <- data.frame(ID = c("1234", "1234", "7491", "7319", "321", "321"), add = c("1234", "1234", "749s1", "73a19", "321", "321"))
 df %>% mutate(TEST = ifelse(as.character(df$ID) == as.character(df$add), 1, 0))
 
+############################################################################################################
+## Revalue ordinal values in a dataframe, based on a level. for example I want to replaced any repeat drug based on the priority. 
+## fda > trial > case > pre . 
+## So for example if drug d is "case" as well as "pre", all incidence of d will be reclassify as "case". 
+## The final table should look like this.
+
+g1 = data.frame ( 
+  drug = c( "a","a","a","d","d"),
+  value = c("fda","trial","case","pre","case")
+)
+
+g1 %>%
+  mutate(value = ordered(value, levels = c("fda", "trial", "case", "pre"))) %>% #order levels in the sequence you want. By ordering factor levels, we can use min/max etc
+  group_by(drug) %>%
+  mutate(value = min(value)) #identifies the minimum level in the grouped 'drug', and replaces all values with the lowest level
+
+############################################################################################################
+## Replace NA using replace_na from tidyr to replace all NA in a particular column (using mutate_at), and 
+## doing some conditions, i.e. if 1&0 from the same nest, 0 is returned
+
+data1 <- structure(list(nest.code = structure(c(1L, 1L, 1L, 2L, 2L, 2L, 
+                                                3L, 3L, 3L, 3L, 4L, 4L, 4L, 5L, 5L, 5L, 6L, 6L, 6L, 6L, 6L), .Label = c("D046", 
+                                                                                                                        "D047", "D062", "D063", "W18003", "W18004"), class = "factor"), 
+                        year = c(2018L, 2018L, 2018L, 2018L, 2018L, 2018L, 2018L, 
+                                 2018L, 2018L, 2018L, 2018L, 2018L, 2018L, 2018L, 2018L, 2018L, 
+                                 2018L, 2018L, 2018L, 2018L, 2018L), species = structure(c(1L, 
+                                                                                           1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 2L, 2L, 
+                                                                                           2L, 2L, 2L, 2L, 2L), .Label = c("AA", "BB"), class = "factor"), 
+                        visit = c(1L, 2L, 3L, 1L, 2L, 3L, 1L, NA, 2L, 3L, 1L, 2L, 
+                                  3L, NA, 2L, 3L, 1L, NA, 2L, 3L, NA), eggs = c(1L, NA, NA, 
+                                                                                1L, NA, 0L, 2L, NA, NA, 0L, 1L, NA, 0L, NA, NA, NA, 2L, NA, 
+                                                                                NA, 0L, 0L), chicks = c(NA, NA, NA, NA, 1L, 0L, NA, NA, 2L, 
+                                                                                                        0L, NA, 1L, 0L, NA, NA, 1L, NA, NA, NA, 0L, 0L), outcome = structure(c(1L, 
+                                                                                                                                                                               3L, 3L, 1L, 3L, 2L, 1L, 1L, 3L, 2L, 1L, 3L, 2L, 1L, 4L, 3L, 
+                                                                                                                                                                               1L, 1L, 3L, 2L, 2L), .Label = c("incubating", "nest failed", 
+                                                                                                                                                                                                               "rearing", "unknown"), class = "factor"), success = c(NA, 
+                                                                                                                                                                                                                                                                     1L, NA, NA, 1L, 0L, NA, NA, 1L, 0L, NA, 1L, 0L, NA, NA, 1L, 
+                                                                                                                                                                                                                                                                     NA, NA, 1L, 0L, NA)), class = "data.frame", row.names = c(NA, 
+                                                                                                                                                                                                                                                                                                                               -21L))
+
+data1 %>% 
+  group_by(year, species, nest.code) %>%
+  mutate_at(.vars=vars(success), funs(replace_na(.,1))) %>% #replaces NA with 1 at COLUMN "SUCCESS"
+  summarize(Realsuccess = min(success))
+
+###########################################################################################################
+## Obtain min and max date of each part and custid grouped
+t1 %>% group_by(CUST_CD, PART_ID) %>% mutate(mindate = date[which.min(date)], 
+                                             maxdate = date[which.max(date)]) #obtain min and max date of each part and cust_Cd
+
