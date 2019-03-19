@@ -118,3 +118,17 @@ data1 %>%
 t1 %>% group_by(CUST_CD, PART_ID) %>% mutate(mindate = date[which.min(date)], 
                                              maxdate = date[which.max(date)]) #obtain min and max date of each part and cust_Cd
 
+
+##########################################################################################################
+# Mutate and obtain next business day
+library(bizdays)
+
+load_rmetrics_calendars(2014)
+
+mutate(df2, 
+       nbd_time=following(time_seq, 'Rmetrics/NERC'),
+       nbd_time=ifelse(nbd_time==time_seq, offset(time_seq, 1, 'Rmetrics/NERC'), nbd_time),
+       nbd_time=as.Date(nbd_time, origin="1970-01-01"),
+       nbddow=wday(nbd_time, label=TRUE))
+
+https://stackoverflow.com/questions/40194309/dplyr-mutate-and-find-next-business-day 
