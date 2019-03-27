@@ -132,3 +132,25 @@ mutate(df2,
        nbddow=wday(nbd_time, label=TRUE))
 
 https://stackoverflow.com/questions/40194309/dplyr-mutate-and-find-next-business-day 
+
+##########################################################################################################
+## Update one column based on predefined groupings of another column
+
+df <- data.frame(ID = 1:5, Type = c("Windows", "Windows Server", "Cat", "Dog", "Eggs"))
+
+it <- c("Windows", "Windows Server")
+animal <- c("Cat", "Dog")
+food <- c("Eggs")
+
+#create the list of predefined vectors
+map <- list(
+  it = c("Windows", "Windows Server"),
+  animal = c("Cat", "Dog"),
+  food = c("Eggs")) #note that the vectors have to be defined inside the list
+
+#use left join
+library(dplyr)   
+df %>% left_join(stack(map), by = c("Type" = "values"))
+
+######### METHOD 2 - Using GSUB
+df$Grouping <- gsub(paste(it, collapse = "|"), "IT", df$Type)
