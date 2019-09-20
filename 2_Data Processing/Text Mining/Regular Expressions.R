@@ -162,3 +162,5 @@ Explanation:
 "^[[:alpha:]_-]+.*" The above followed by any character repeated zero or more times.
 "^[[:alpha:]_-]+.*\\.com$" ending with the string ".com" where the dot is not a metacharacter and therefore must be escaped.
 
+## Adds the plus between characters
+apply(s, 1, function(x) str_sub(sub("\\s+$", "", gsub('(.{2})', '\\1+\\', x)), end=-2))

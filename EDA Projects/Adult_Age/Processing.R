@@ -1,4 +1,4 @@
-setwd("C:/Users/Javier Ng/Desktop/Rfiles/Essential-R-Codes/EDA Projects/Adult_Age")
+setwd("C:/Users/zm679xs/Desktop/R/Essential-R-Codes/EDA Projects/Adult_Age")
 
 library(data.table)
 library(mlr)
@@ -77,5 +77,87 @@ library(caret)
 ts_label <- as.factor(ts_label)
 xgbpred <- as.factor(xgbpred)
 confusionMatrix(xgbpred, ts_label)
-#Accuracy - 86.54%` 
+#Accuracy - 89.49%` 
+# 0: <=50k & 1: >50k
+
+#convert characters to factors
+fact_col <- colnames(train)[sapply(train,is.character)]
+
+for(i in fact_col) set(train,j=i,value = factor(train[[i]]))
+for (i in fact_col) set(test,j=i,value = factor(test[[i]]))
+
+#create tasks
+traintask <- makeClassifTask(data = train,target = "target")
+testtask <- makeClassifTask (data = test,target = "target")
+
+#do one hot encoding`<br/> 
+traintask <- createDummyFeatures (obj = traintask,target = "target") 
+testtask <- createDummyFeatures (obj = testtask,target = "target")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+test$pred <- xgbpred
+test$actual <- ts_label
+
+###########################################################
+#multiple-in-one plot
+#Ensemble several trees into a single one
+xgb.plot.multi.trees(model = xgb1)
+
+##plot feature importance
+importance_matrix <- xgb.importance(model = xgb1)
+xgb.plot.importance(importance_matrix, top_n = 10)
+
+
+###############################################################
+library(ROCR)
+
+# Use ROCR package to plot ROC Curve
+xgb.pred <- prediction(as.numeric(test$pred), as.numeric(test$actual))
+xgb.perf <- performance(xgb.pred, "tpr", "fpr")
+
+plot(xgb.perf,
+     avg="threshold",
+     colorize=TRUE,
+     lwd=1,
+     main="ROC Curve w/ Thresholds",
+     print.cutoffs.at=seq(0, 1, by=0.05),
+     text.adj=c(-0.5, 0.5),
+     text.cex=0.5)
+grid(col="lightgray")
+axis(1, at=seq(0, 1, by=0.1))
+axis(2, at=seq(0, 1, by=0.1))
+abline(v=c(0.1, 0.3, 0.5, 0.7, 0.9), col="lightgray", lty="dotted")
+abline(h=c(0.1, 0.3, 0.5, 0.7, 0.9), col="lightgray", lty="dotted")
+lines(x=c(0, 1), y=c(0, 1), col="black", lty="dotted")
+
+auc_ROCR <- performance(xgb.pred, measure = "auc") #gives the AUC rate
+auc_ROCR <- auc_ROCR@y.values[[1]] 
+auc_ROCR 
+#AUC = 0.831
 

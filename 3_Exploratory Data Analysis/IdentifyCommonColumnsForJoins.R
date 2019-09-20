@@ -62,6 +62,8 @@ insertref_obj <- function(refobj){
   return(templist) #returns a list
 }
 
+library(xlsx)
+
 #create the final output workbook
 workbook_create <- function(createdlist){
   wb <- createWorkbook()
