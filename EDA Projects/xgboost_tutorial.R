@@ -32,7 +32,7 @@ testing = iris[-ind,]
 #      The same parameters are used by Step 1 and Step 2.
 #      You can try different values for nthread, max_depth, eta, gamma, etc., and see if you get lower prediction error.
 
-param       = list("objective" = "multi:softmax", # multi class classification
+param = list("objective" = "multi:softmax", # multi class classification
                    "num_class"= 3 ,  		# Number of classes in the dependent variable.
                    "eval_metric" = "mlogloss",  	 # evaluation metric 
                    "nthread" = 8,   			 # number of threads to be used 
